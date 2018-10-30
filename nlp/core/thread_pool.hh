@@ -16,8 +16,7 @@
 
 /* class & function section */
 
-namespace nlp {
-namespace core {
+namespace nlplite {
 
 template<size_t N,
 	template<class T, class Container = std::deque<T>> class Queue = std::queue>
@@ -64,8 +63,7 @@ public:
 	}
 };
 
-} // namespace core
-} // namespace nlp
+} // namespace nlplite
 
 #endif//
 
