@@ -9,6 +9,7 @@
 
 #include <fstream>
 #include <vector>
+#include <type_traits>
 
 #include "utility/constant.hh"
 #include "utility/string.hh"
@@ -20,94 +21,86 @@ namespace nlp {
 /* file type */
 enum class READER_TYPE : int { LABELED, MULTI_LABELED, UNLABELED };
 
-namespace detail {
 
-/* base class for file reading */
-struct ReaderBase {
+/* type traits */
+template<READER_TYPE Type>
+struct ReaderTraits {};
+
+template<>
+struct ReaderTraits<READER_TYPE::LABELED> {
+	using label_t = std::string;
+};
+
+template<>
+struct ReaderTraits<READER_TYPE::MULTI_LABELED> {
+	using label_t = std::vector<std::string>;
+};
+
+
+/* class for file reading */
+template<READER_TYPE Type>
+class Reader {
+public:
+	using label_t = std::enable_if_t<Type != READER_TYPE::UNLABELED,
+				typename ReaderTraits<Type>::label_t>;
+
+private:
 	/* members */
 	std::fstream fs_;
 	char line_[IO_LINE_MAX_LEN];
 
-	/* constructor & destructor */
-	ReaderBase();
-	ReaderBase(std::string const& fn);
-	ReaderBase(ReaderBase const&) = delete;
-	ReaderBase& operator=(ReaderBase const&) = delete;
-	~ReaderBase() = default;
-
-	/* interface */
-	void open(std::string const& fn);
-	void close();
-	bool is_open();
-};
-
-
-/* implementation class for labeled file reading */
-struct ReaderL : ReaderBase {
-	/* type alias */
-	using label_t = std::string;
-
-	/* constructor */
-	ReaderL();
-	ReaderL(std::string const& fn);
-
-	/* interface */
-	bool readline(std::string& text, std::string& label);
-};
-
-
-/* implementation class for multi-labeled file reading */
-struct ReaderM : ReaderBase {
-	/* type alias */
-	using label_t = std::vector<std::string>;
-
-	/* constructor */
-	ReaderM();
-	ReaderM(std::string const& fn);
-
-	/* interface */
-	bool readline(std::string& text, std::vector<std::string>& labels);
-};
-
-
-/* implementation class for unlabeled file reading */
-struct ReaderU : ReaderBase {
-	/* constructor */
-	ReaderU();
-	ReaderU(std::string const& fn);
-
-	/* interface */
-	bool readline(std::string& text);
-};
-
-} // namespace detail
-
-/* class for file reading */
-
-template<READER_TYPE Type>
-using ReaderT = std::conditional_t< Type == READER_TYPE::LABELED, detail::ReaderL,
-			std::conditional_t<Type == READER_TYPE::MULTI_LABELED, detail::ReaderM, detail::ReaderU> >;
-
-template<READER_TYPE Type>
-class Reader : public ReaderT<Type> {
 public:
-	/* type alias */
-	using reader_t = ReaderT<Type>;
-
-	/* constructor & destructor */
-	Reader() : reader_t() {}
-	Reader(std::string const& fn) : reader_t(fn) {}
-	~Reader() = default;
+	/* common interface */
+	void open(std::string const& fn) { fs_.open(fn); }
+	void close() { fs_.close(); }
+	bool is_open() { return fs_.is_open(); }
+	bool eof() { return !bool(fs_); }
 
 	/* interface for read line
-	 * different interface allowed with the template parameter Type
+	 * different interface allowed to compile with the template parameter Type
 	 * READER_TYPE::LABELED - bool readline(std::string& text, std::string& label);
 	 * READER_TYPE::MULTILABELED - bool readline(std::string& text, std::vector<std::string>& labels);
 	 * READER_TYPE::UNLABELED - readline(std::string& text);
 	 */
+	template<READER_TYPE U = Type>
+	std::enable_if_t<U == READER_TYPE::LABELED, bool>
+	readline(std::string& text, std::string& label) {
+		if (!is_open() or !fs_) return false;
+		fs_.getline(line_, IO_LINE_MAX_LEN);
+		std::vector<std::string> l = string::split(line_, "\t"); // XXX: optimize the delimeter
+		if (l.size() != 2) return false;
+		label = l[0];
+		text = l[1];
+		return true;
+	}
 
-	/* interface for eof */
-	bool eof() { return !bool(detail::ReaderBase::fs_); }
+	template<READER_TYPE U = Type>
+	std::enable_if_t<U == READER_TYPE::MULTI_LABELED, bool>
+	readline(std::string& text, std::vector<std::string>& labels) {
+		if (!is_open() or !fs_) return false;
+		fs_.getline(line_, IO_LINE_MAX_LEN);
+		std::vector<std::string> l = string::split(line_, "\t");
+		if (l.size() != 2) return false;
+		labels = string::split(l[0], "|"); // XXX: optimize the delimeter
+		text = l[1];
+		return true;
+	}
+
+	template<READER_TYPE U = Type>
+	std::enable_if_t<U == READER_TYPE::UNLABELED, bool>
+	readline(std::string& text) {
+		if (!is_open() or !fs_) return false;
+		fs_.getline(line_, IO_LINE_MAX_LEN);
+		text = line_;
+		return true;
+	}
+
+	/* constructor & destructor */
+	Reader() : fs_(), line_() {}
+	Reader(std::string const& fn) : fs_(fn, std::ios_base::in), line_() {}
+	Reader(Reader const&) = delete;
+	Reader& operator=(Reader const&) = delete;
+	~Reader() = default;
 };
 
 }
