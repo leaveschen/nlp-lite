@@ -16,6 +16,9 @@ namespace nlp {
 // io
 constexpr Index IO_LINE_MAX_LEN = 10240;
 
+// object pool
+constexpr Index POOL_CHUNK_SIZE = 64;
+
 } // namespace nlp
 
 #endif//
