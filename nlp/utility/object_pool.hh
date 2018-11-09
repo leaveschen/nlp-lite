@@ -10,7 +10,6 @@
 #include <utility>
 #include <memory>
 #include <vector>
-#include <iostream>
 
 #include "utility/constant.hh"
 
@@ -57,7 +56,7 @@ public:
 template<class T,
 	size_t Capacity,
 	template<class> class Allocator = ArrayAlloctor>
-class ObjectPoolChunk {
+struct ObjectPoolChunk {
 public:
 	/* memory block */
 	union Block {
@@ -69,64 +68,33 @@ public:
 
 public:
 	/* members */
-	constexpr static size_t capacity_ = Capacity;
-	Allocator<Block> arr_;
-	Block* head_;
-	Block* tail_;
-	size_t rest_;
+	constexpr static size_t capacity = Capacity;
+	Allocator<Block> arr;
+	Block* head;
+	Block* tail;
 
 public:
 	/* ctor & dtor */
-	ObjectPoolChunk() : arr_(capacity_), head_(nullptr), tail_(nullptr), rest_(capacity_) {
-		static_assert(Capacity>1, "pool chunk size must be non-zero");
-		for (size_t i = 0; i < capacity_ - 1; ++i) {
-			new (arr_[i]) Block();
-			arr_[i]->next = arr_[i+1];
+	ObjectPoolChunk() : arr(capacity), head(nullptr), tail(nullptr) {
+		static_assert(Capacity, "pool chunk size must be non-zero");
+		for (size_t i = 0; i < capacity - 1; ++i) {
+			new (arr[i]) Block();
+			arr[i]->next = arr[i+1];
 		}
-		head_ = arr_[0];
+		head = arr[0];
 
 		// reserve the last one block as placeholder
-		//new (arr_[capacity_-1]) Block();
-		tail_ = arr_[capacity_-1];
-		new (tail_) Block();
-		//arr_[capacity_-1]->next = head_;
+		tail = arr[capacity-1];
+		new (tail) Block();
 	}
 	ObjectPoolChunk(ObjectPoolChunk const&) = delete;
 	ObjectPoolChunk& operator=(ObjectPoolChunk const&) = delete;
 	~ObjectPoolChunk() {
 		// XXX: is this destruction safety?
-		for (size_t i = 0; i < capacity_ - 1; ++i) {
-			//std::cout << typeid(arr_[i]).name() << "\n";
-			//std::cout << arr_[i] << "---" << &arr_[i]->t << "\n";
-			destroy(&arr_[i]->t);
+		for (size_t i = 0; i < capacity - 1; ++i) {
+			arr[i]->t.~T();
 		}
 	}
-
-	/* interface, create new object */
-	template<class... Args>
-	T* create(Args&&... args) {
-		// the case when only the placeholder remained
-		if (head_ == tail_) return nullptr;
-
-		Block* curr = head_;
-		head_ = head_->next;
-		return new (static_cast<void*>(curr)) T(std::forward<Args>(args)...);
-	}
-
-	/* interface, destroy object */
-	void destroy(T* p) {
-		p->~T();
-		auto ptr = reinterpret_cast<Block*>(p);
-		ptr->next = head_;
-		head_ = ptr;
-	}
-
-	/* interface for state */
-	bool is_full() { return head_ == tail_; }
-
-	/* get head & tail pointer */
-	Block* head() { return head_; }
-	Block* tail() { return tail_; }
 };
 
 } // namespace detail
@@ -143,16 +111,15 @@ public:
 private:
 	/* members */
 	std::vector<chunk_t*> chunks_;
-	chunk_t* curr_chunk_;
 	block_t* head_;
 	block_t* tail_;
 
 public:
 	/* ctor & dtor */
-	ObjectPool() : chunks_(), curr_chunk_(nullptr), head_(nullptr), tail_(nullptr) {
+	ObjectPool() : chunks_(), head_(nullptr), tail_(nullptr) {
 		chunk_t* c = new chunk_t();
-		head_ = c->head_;
-		tail_ = c->tail_;
+		head_ = c->head;
+		tail_ = c->tail;
 		chunks_.emplace_back(c);
 	}
 	ObjectPool(ObjectPool const&) = delete;
@@ -162,21 +129,22 @@ public:
 	/* interface, create */
 	template<class...Args>
 	T* create(Args&&...args) {
+		block_t* curr = head_;
 		if (head_ == tail_) {
 			chunk_t* c = new chunk_t();
-			head_ = c->head_;
-			tail_ = c->tail_;
+			head_ = c->head;
+			tail_ = c->tail;
 			chunks_.emplace_back(c);
+		} else {
+			head_ = head_->next;
 		}
-		block_t* curr = head_;
-		head_ = head_->next;
 		return new (static_cast<void*>(curr)) T(std::forward<Args>(args)...);
 	}
 
 	/* interface, destroy */
 	void destroy(T* p) {
 		p->~T();
-		auto ptr = reinterpret_cast<Block*>(p);
+		auto ptr = reinterpret_cast<block_t*>(p);
 		ptr->next = head_;
 		head_ = ptr;
 	}
