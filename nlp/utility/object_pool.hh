@@ -67,7 +67,7 @@ public:
 		Block() : next(nullptr) {}
 	};
 
-private:
+public:
 	/* members */
 	constexpr static size_t capacity_ = Capacity;
 	Allocator<Block> arr_;
@@ -143,17 +143,17 @@ public:
 private:
 	/* members */
 	std::vector<chunk_t*> chunks_;
-	chunk_t* curr_;
+	chunk_t* curr_chunk_;
 	block_t* head_;
+	block_t* tail_;
 
 public:
 	/* ctor & dtor */
-	ObjectPool() : chunks_(), curr_(nullptr), head_(nullptr) {
+	ObjectPool() : chunks_(), curr_chunk_(nullptr), head_(nullptr), tail_(nullptr) {
 		chunk_t* c = new chunk_t();
+		head_ = c->head_;
+		tail_ = c->tail_;
 		chunks_.emplace_back(c);
-		curr_ = chunks_[0];
-		head_ = curr_->head();
-		//head_ = chunks_[curr_]->head();
 	}
 	ObjectPool(ObjectPool const&) = delete;
 	ObjectPool& operator=(ObjectPool const&) = delete;
@@ -162,12 +162,23 @@ public:
 	/* interface, create */
 	template<class...Args>
 	T* create(Args&&...args) {
-		if (curr_->is_full()) {
+		if (head_ == tail_) {
 			chunk_t* c = new chunk_t();
-			curr_ = c;
+			head_ = c->head_;
+			tail_ = c->tail_;
 			chunks_.emplace_back(c);
 		}
-		return curr_->create(std::forward<Args>(args)...);
+		block_t* curr = head_;
+		head_ = head_->next;
+		return new (static_cast<void*>(curr)) T(std::forward<Args>(args)...);
+	}
+
+	/* interface, destroy */
+	void destroy(T* p) {
+		p->~T();
+		auto ptr = reinterpret_cast<Block*>(p);
+		ptr->next = head_;
+		head_ = ptr;
 	}
 };
 
