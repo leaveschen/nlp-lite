@@ -14,14 +14,14 @@
 
 namespace nlp {
 
-/* basic symbol class
+/* basic symbol class,
  * define the interface here */
 template<class Derived>
 class Symbol {
 public:
 	/* type alias */
 	using shape_t = typename detail::traits<Derived>::shape_t;
-	using matrix_t = typename detail::traits<Derived>::matrix_t;
+	using storage_t = typename detail::traits<Derived>::storage_t;
 
 	/* derived object */
 	Derived& derived() { return static_cast<Derived&>(*this); }

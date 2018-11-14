@@ -7,6 +7,8 @@
 
 /* include section */
 
+#include <cstddef>
+
 /* class & function section */
 
 namespace nlp {

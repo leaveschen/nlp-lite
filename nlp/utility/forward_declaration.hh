@@ -17,9 +17,11 @@ template<class T> struct traits;
 
 } // namespace detail
 
-template<class Shape, class Matrix> class Variable;
-template<class Shape, class Matrix, class ForwardOp, class BackwardOp> class Layer;
+template<class Shape, class Storage> class Variable;
+template<class Shape, class Storage, class ForwardOp, class BackwardOp> class Layer;
 
+template<class Scalar> class StorageDense;
+template<class Scalar> class StorageVariable;
 
 } // namespace nlp
 

@@ -16,22 +16,22 @@ namespace nlp {
 
 namespace detail {
 
-template<class Shape, class Matrix, class ForwardOp, class BackwardOp>
-struct traits< Layer<Shape, Matrix, ForwardOp, BackwardOp> > {
+template<class Shape, class Storage, class ForwardOp, class BackwardOp>
+struct traits< Layer<Shape, Storage, ForwardOp, BackwardOp> > {
 	using shape_t = Shape;
-	using matrix_t = Matrix;
+	using storage_t = Storage;
 	using forward_t = ForwardOp;
 	using backward_t = BackwardOp;
 };
 
 } // namespace detail
 
-template<class Shape, class Matrix, class ForwardOp, class BackwardOp>
-class Layer : public Symbol< Layer<Shape, Matrix, ForwardOp, BackwardOp> > {
+template<class Shape, class Storage, class ForwardOp, class BackwardOp>
+class Layer : public Symbol< Layer<Shape, Storage, ForwardOp, BackwardOp> > {
 private:
 	/* members */
 	Shape shape_;
-	Matrix data_;
+	Storage data_;
 	ForwardOp forward_op_;
 	BackwardOp backward_op_;
 

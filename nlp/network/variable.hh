@@ -16,20 +16,20 @@ namespace nlp {
 
 namespace detail {
 
-template<class Shape, class Matrix>
-struct traits< Variable<Shape, Matrix> > {
+template<class Shape, class Storage>
+struct traits< Variable<Shape, Storage> > {
 	using shape_t = Shape;
-	using matrix_t = Matrix;
+	using storage_t = Storage;
 };
 
 } // namespace detail
 
-template<class Shape, class Matrix>
-class Variable : public Symbol< Variable<Shape, Matrix> > {
+template<class Shape, class Storage>
+class Variable : public Symbol< Variable<Shape, Storage> > {
 private:
 	/* members */
 	Shape shape_;
-	Matrix data_;
+	Storage data_;
 
 public:
 	/* ctor & dtor */
@@ -45,7 +45,7 @@ public:
 
 	/* shape attribute */
 	Shape& shape() { return shape_; }
-	Shape const& shape() const { return shape_ ;}
+	Shape const& shape() const { return shape_; }
 };
 
 } // namespace nlp
