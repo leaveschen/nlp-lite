@@ -29,16 +29,16 @@ template<class Scalar>
 class StorageDense : public Storage< StorageDense<Scalar> > {
 public:
 	/* type alias */
-	using data_t = typename detail::traits<StorageDense>::data_t;
+	//using data_t = typename detail::traits<StorageDense>::data_t;
 
 private:
 	/* members */
-	data_t data_;
+	//data_t data_;
 
 public:
 	/* data access */
-	data_t& data() { return data_; }
-	data_t const& data() const { return data_; }
+	//data_t& data() { return data_; }
+	//data_t const& data() const { return data_; }
 };
 
 } // namespace nlp

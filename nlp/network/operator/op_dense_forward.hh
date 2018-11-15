@@ -10,19 +10,31 @@
 #include "utility/types.hh"
 #include "network/operator.hh"
 #include "network/storage/storage_dense.hh"
-#include "network/storage/storage_variable.hh"
+#include "network/storage/storage_dense_variable.hh"
 
 /* class & function section */
 
 namespace nlp {
 
+namespace detail {
+
+template<class Scalar>
+struct traits< OpDenseForward<Scalar> > {
+	using content_t = typename detail::traits< StorageDense<Scalar> >::data_t;
+	using input_t = typename detail::traits< StorageDenseVariable<Scalar> >::data_t;
+	using output_t = typename detail::traits< StorageDenseVariable<Scalar> >::data_t;
+};
+
+} // namespace detail
+
 /* forward operator for dense layer */
-class OpDenseForward : public OperatorForward<OpDenseForward> {
+template<class Scalar>
+class OpDenseForward : public OperatorForward< OpDenseForward<Scalar> > {
 public:
 	/* type alias */
-	using content_t = typename detail::traits< StorageDense<Real> >::data_t;
-	using input_t = typename detail::traits< StorageVariable<Real> >::data_t;
-	using output_t = typename detail::traits< StorageVariable<Real> >::data_t;
+	using typename OperatorForward< OpDenseForward<Scalar> >::content_t;
+	using typename OperatorForward< OpDenseForward<Scalar> >::input_t;
+	using typename OperatorForward< OpDenseForward<Scalar> >::output_t;
 
 	/* ctor & dtor */
 	OpDenseForward() = default;
@@ -30,9 +42,11 @@ public:
 	OpDenseForward& operator=(OpDenseForward const&) = delete;
 	~OpDenseForward() = default;
 
-	/* interface */
-	output_t run(content_t const& content, input_t const& input);
-	void run(content_t const& content, input_t const& input, output_t& output);
+	/* implementation */
+	void run_impl(content_t const& content, input_t const& input, output_t& output) {
+		// TODO: update the storage major for performance
+		output = content * input;
+	}
 };
 
 } // namespace nlp

@@ -21,15 +21,20 @@ public:
 	/* type alias */
 	using data_t = typename detail::traits<Derived>::data_t;
 
+private:
+	/* members */
+	data_t data_;
+
+public:
 	/* derived object */
 	Derived& derived() { return static_cast<Derived&>(*this); }
 	Derived const& derived() const { return static_cast<Derived const&>(*this); }
 
 	/* interface, data attribute */
 	// TODO: implement move_to_data function for avoiding copy data
-	void set_data(data_t const& data) { derived().data() = data; }
-	data_t& get_data() { return derived().data(); }
-	data_t const& get_data() const { return derived().data(); }
+	void set_data(data_t const& data) { data_ = data; }
+	data_t& get_data() { return data_; }
+	data_t const& get_data() const { return data_; }
 };
 
 } // namespace nlp
