@@ -16,40 +16,26 @@ namespace nlp {
 
 namespace detail {
 
-template<class Shape, class Storage, class ForwardOp, class BackwardOp>
-struct traits< Layer<Shape, Storage, ForwardOp, BackwardOp> > {
+template<class Shape>
+struct traits< Layer<Shape> > {
 	using shape_t = Shape;
-	using storage_t = Storage;
-	using forward_t = ForwardOp;
-	using backward_t = BackwardOp;
 };
 
 } // namespace detail
 
-template<class Shape, class Storage, class ForwardOp, class BackwardOp>
-class Layer : public Symbol< Layer<Shape, Storage, ForwardOp, BackwardOp> > {
+template<class Shape>
+class Layer : public Symbol< Layer<Shape> > {
 private:
 	/* members */
 	Shape shape_;
-	Storage data_;
-	ForwardOp forward_op_;
-	BackwardOp backward_op_;
 
 public:
 	/* ctor & dtor */
-	Layer() : data_(), shape_(), forward_op_(), backward_op_() {}
+	Layer() : shape_() {}
 	~Layer() {}
 
 	/* shape attribute */
 	Shape& shape() { return shape_; }
-
-	/* forward */
-	template<class Var>
-	void forward(Var input) { forward_op_.run(data_, input); }
-
-	/* backward */
-	template<class Var>
-	void backward(Var input) { backward_op_.run(data_, input); }
 };
 
 } // namespace nlp

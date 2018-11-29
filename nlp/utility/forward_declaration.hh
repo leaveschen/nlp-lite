@@ -19,7 +19,7 @@ template<class T> struct traits;
 
 // various symbols
 template<class Shape, class Storage> class Variable;
-template<class Shape, class Storage, class ForwardOp, class BackwardOp> class Layer;
+template<class Shape> class Layer;
 
 // various storages
 template<class Scalar> class StorageDense;
