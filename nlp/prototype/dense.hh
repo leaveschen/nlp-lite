@@ -15,14 +15,14 @@ namespace prototype {
 
 /* dense layer class */
 template<class Scalar,
-	template<class> class InMat,
-	template<class> class OutMat,
+	//template<class> class InMat,
+	//template<class> class OutMat,
 	template<class> class ParamMat>
 class Dense {
 public:
 	/* type alias */
-	using in_type = InMat<Scalar>;
-	using out_type = OutMat<Scalar>;
+	//using in_type = InMat<Scalar>;
+	//using out_type = OutMat<Scalar>;
 	using param_type = ParamMat<Scalar>; // default dense matrix
 
 private:

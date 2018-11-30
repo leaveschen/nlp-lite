@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "-pipe -Wall -g -fPIC -O3")
 
 # include directory
 set(HOME_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${SRC_DIR})
+include_directories(${HOME_DIR} ${HOME_DIR}/../)
 
 # source
 
