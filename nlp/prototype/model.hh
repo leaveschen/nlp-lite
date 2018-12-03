@@ -13,6 +13,7 @@
 #include "variable.hh"
 #include "layer.hh"
 #include "loss.hh"
+#include "activation.hh"
 #include "utility/string.hh"
 
 /* class & function section */
@@ -24,7 +25,7 @@ namespace prototype {
 // temporary code...
 class Model {
 public:
-	Dense<matrix_t, Softmax>* p_layer_;
+	Dense<matrix_t, Softmax, CategoricalCrossentropy>* p_layer_;
 	v_sparse_t* p_feature_;
 	v_sparse_t* p_label_;
 	std::vector<int> label;
@@ -67,7 +68,7 @@ public:
 		int nsample = label.size();
 		std::cout << "nsample: " << nsample << "\n";
 
-		p_layer_ = new Dense<matrix_t, Softmax>(nfeature, nclass);
+		p_layer_ = new Dense<matrix_t, Softmax, CategoricalCrossentropy>(nfeature, nclass);
 		p_feature_ = new v_sparse_t(nsample, nfeature);
 		p_label_ = new v_sparse_t(nsample, nclass);
 

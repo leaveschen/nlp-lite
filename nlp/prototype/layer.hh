@@ -17,7 +17,9 @@ namespace nlp {
 namespace prototype {
 
 /* dense layer class */
-template<class Matrix, class Loss>
+//template<class Matrix, class Loss>
+// TODO: seperate the class Loss and move into optimizer
+template<class Matrix, class Activation, class Loss>
 class Dense {
 public:
 	/* type alias */
@@ -38,6 +40,7 @@ public:
 	template<class In, class Out>
 	void forward(In const& forward_in, Out& forward_out) {
 		forward_out = forward_in * param_;
+		Activation::compute(forward_out);
 	}
 
 	/*template<class ForwardOut, class In, class Out>
