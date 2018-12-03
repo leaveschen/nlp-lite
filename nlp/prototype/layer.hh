@@ -19,7 +19,7 @@ namespace prototype {
 /* dense layer class */
 //template<class Matrix, class Loss>
 // TODO: seperate the class Loss and move into optimizer
-template<class Matrix, class Activation, class Loss>
+template<class Matrix, class Activation, class Loss, class Optimazer>
 class Dense {
 public:
 	/* type alias */
@@ -27,11 +27,15 @@ public:
 public:
 	/* members */
 	Matrix param_;
+	Optimazer optimizer_;
 
 public:
 	/* ctor & dtor */
 	//Dense() : param_() {}
-	Dense(size_t input_dim, size_t output_dim) : param_(input_dim, output_dim) { param_.setZero(); }
+	Dense(size_t input_dim, size_t output_dim) : param_(input_dim, output_dim) {
+		param_.setZero();
+		optimizer_.initialize();
+	}
 	Dense(Dense const&) = delete;
 	Dense& operator=(Dense const&) = delete;
 	~Dense() {}
@@ -65,7 +69,8 @@ public:
 		// sgd optimization
 		//ForwardIn diff = fin.transpose() * gradient; // dense/sparse depend on the input type
 		//cout << "param before:\n" << param_ << "\n";
-		param_ = param_ - fin.transpose() * gradient * 0.001; // TODO: the lr param
+		//param_ = param_ - fin.transpose() * gradient * 0.001; // TODO: the lr param
+		optimizer_.compute(fin, gradient, param_);
 		//cout << "param after:\n" << param_ << "\n";
 	}
 };
