@@ -15,22 +15,6 @@ namespace nlp {
 
 namespace prototype {
 
-struct Softmax {
-	/* calculate softmax activation
-	* source: the output of previous layer
-	*/
-	template<class SourceType>
-	static void compute(SourceType& source) {
-		// compute softmax output
-		source = source.array().exp();
-
-		for (size_t i = 0; i < source.rows(); ++i) {
-			source.row(i) = source.row(i) /
-				(source.row(i).sum() + std::numeric_limits<typename SourceType::Scalar>::epsilon());
-		}
-	}
-};
-
 struct ActivateEmpty {
 	template<class SourceType>
 	static void compute(SourceType& source) {}

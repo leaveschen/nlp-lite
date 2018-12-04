@@ -19,7 +19,7 @@ namespace prototype {
 /* dense layer class */
 //template<class Matrix, class Loss>
 // TODO: seperate the class Loss and move into optimizer
-template<class Matrix, class Activation, class Loss, class Optimazer>
+template<class Matrix, class Activation, class Optimazer>
 class Dense {
 public:
 	/* type alias */
@@ -31,9 +31,8 @@ public:
 
 public:
 	/* ctor & dtor */
-	//Dense() : param_() {}
 	Dense(size_t input_dim, size_t output_dim) : param_(input_dim, output_dim) {
-		param_.setZero();
+		param_.setZero(); // must done here, for eigen deduction
 		optimizer_.initialize();
 	}
 	Dense(Dense const&) = delete;
@@ -54,6 +53,7 @@ public:
 		optimizer_.compute(fin, bin, param_);
 	}
 
+	/*
 	template<class ForwardIn, class ForwardOut, class BackwardIn, class BackwardOut>
 	void forward_backward(ForwardIn const& fin, ForwardOut& fout,
 			BackwardIn const& bin, BackwardOut& bout) {
@@ -73,7 +73,7 @@ public:
 		//param_ = param_ - fin.transpose() * gradient * 0.001; // TODO: the lr param
 		optimizer_.compute(fin, gradient, param_);
 		//cout << "param after:\n" << param_ << "\n";
-	}
+	}*/
 };
 
 } // namespace prototype

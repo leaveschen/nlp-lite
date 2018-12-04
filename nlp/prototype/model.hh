@@ -26,7 +26,7 @@ namespace prototype {
 // temporary code...
 class Model {
 public:
-	Dense<matrix_t, ActivateEmpty, CategoricalCrossentropy, SGD>* p_layer_;
+	Dense<matrix_t, ActivateEmpty, SGD>* p_layer_;
 	v_sparse_t* p_feature_;
 	v_sparse_t* p_label_;
 	std::vector<int> label;
@@ -69,7 +69,7 @@ public:
 		int nsample = label.size();
 		std::cout << "nsample: " << nsample << "\n";
 
-		p_layer_ = new Dense<matrix_t, ActivateEmpty, CategoricalCrossentropy, SGD>(nfeature, nclass);
+		p_layer_ = new Dense<matrix_t, ActivateEmpty, SGD>(nfeature, nclass);
 		p_feature_ = new v_sparse_t(nsample, nfeature);
 		p_label_ = new v_sparse_t(nsample, nclass);
 
