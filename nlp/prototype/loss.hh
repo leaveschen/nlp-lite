@@ -45,6 +45,21 @@ struct CategoricalCrossentropy {
 	static void compute(SourceType const& source, TargetType const& target, SourceType& loss) {
 		loss = source - target;
 	}
+
+	template<class SourceType, class TargetType>
+	static void backward(SourceType const& source, TargetType const& target, SourceType& gradient) {
+		// compute softmax output, assign to the gradient for temporary storing
+		gradient = source.array().exp();
+
+		// normalization
+		for (size_t i = 0; i < gradient.rows(); ++i) {
+			gradient.row(i) = gradient.row(i) /
+				(gradient.row(i).sum() + std::numeric_limits<typename SourceType::Scalar>::epsilon());
+		}
+
+		// compute the gradient
+		gradient -= target;
+	}
 };
 
 } // namespace prototype

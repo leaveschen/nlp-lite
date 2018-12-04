@@ -31,6 +31,19 @@ struct Softmax {
 	}
 };
 
+struct ActivateEmpty {
+	template<class SourceType>
+	static void compute(SourceType& source) {}
+};
+
+
+struct ActivateRelu {
+	template<class SourceType>
+	static void compute(SourceType& source) {
+		source = (source.array().abs() + source.array()) / 2;
+	}
+};
+
 } // namespace prototype
 } // namespace nlp
 #endif//

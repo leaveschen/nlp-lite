@@ -47,11 +47,12 @@ public:
 		Activation::compute(forward_out);
 	}
 
-	/*template<class ForwardOut, class In, class Out>
-	void backward(ForwardOut const& forward_out, In const& backward_in, Out& backward_out) {
-		ForwardOut gradient;
-		Loss::compute(forward_out, backward_in, gradient);
-	}*/
+	template<class ForwardIn, class ForwardOut, class BackwardIn, class BackwardOut>
+	void backward(ForwardIn const& fin, ForwardOut const& fout,
+			BackwardIn const& bin, BackwardOut& bout) {
+		/* bin: as the gradient back propagated from the next layer */
+		optimizer_.compute(fin, bin, param_);
+	}
 
 	template<class ForwardIn, class ForwardOut, class BackwardIn, class BackwardOut>
 	void forward_backward(ForwardIn const& fin, ForwardOut& fout,

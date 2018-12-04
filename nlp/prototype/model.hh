@@ -26,7 +26,7 @@ namespace prototype {
 // temporary code...
 class Model {
 public:
-	Dense<matrix_t, Softmax, CategoricalCrossentropy, SGD>* p_layer_;
+	Dense<matrix_t, ActivateEmpty, CategoricalCrossentropy, SGD>* p_layer_;
 	v_sparse_t* p_feature_;
 	v_sparse_t* p_label_;
 	std::vector<int> label;
@@ -69,7 +69,7 @@ public:
 		int nsample = label.size();
 		std::cout << "nsample: " << nsample << "\n";
 
-		p_layer_ = new Dense<matrix_t, Softmax, CategoricalCrossentropy, SGD>(nfeature, nclass);
+		p_layer_ = new Dense<matrix_t, ActivateEmpty, CategoricalCrossentropy, SGD>(nfeature, nclass);
 		p_feature_ = new v_sparse_t(nsample, nfeature);
 		p_label_ = new v_sparse_t(nsample, nclass);
 
@@ -129,7 +129,14 @@ public:
 		for (int i = 0; i < epoch; ++i) {
 			std::cout << "epoch: " << i << "\n";
 			p_layer_->forward(*p_feature_test_, tout);
-			p_layer_->forward_backward(*p_feature_train_, fout, *p_label_train_, bout);
+			//p_layer_->forward_backward(*p_feature_train_, fout, *p_label_train_, bout);
+
+			// split into forward & backward step
+			p_layer_->forward(*p_feature_train_, fout);
+			v_dense_t gradient;
+			CategoricalCrossentropy::backward(fout, *p_label_train_, gradient);
+			p_layer_->backward(*p_feature_train_, fout, gradient, bout);
+
 			std::cout << "train accuracy\n";
 			acc(fout, label_train);
 			std::cout << "test accuracy\n";
