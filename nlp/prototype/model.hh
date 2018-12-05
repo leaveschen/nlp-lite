@@ -136,6 +136,7 @@ public:
 			v_dense_t gradient;
 			CategoricalCrossentropy::backward(fout, *p_label_train_, gradient);
 			p_layer_->backward(*p_feature_train_, fout, gradient, bout);
+			//std::cout << bout.rows() << ":" << bout.cols() << "\n";
 
 			std::cout << "train accuracy\n";
 			acc(fout, label_train);

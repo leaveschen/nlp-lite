@@ -43,13 +43,19 @@ public:
 	template<class In, class Out>
 	void forward(In const& forward_in, Out& forward_out) {
 		forward_out = forward_in * param_;
-		Activation::compute(forward_out);
+		Activation::forward(forward_out);
 	}
 
 	template<class ForwardIn, class ForwardOut, class BackwardIn, class BackwardOut>
 	void backward(ForwardIn const& fin, ForwardOut const& fout,
 			BackwardIn const& bin, BackwardOut& bout) {
 		/* bin: as the gradient back propagated from the next layer */
+		// activation backward
+		Activation::backward(bin);
+		// calculate residual
+		//bout = bin * param_.transpose(); // XXX: ???
+
+		// update parameters
 		optimizer_.compute(fin, bin, param_);
 	}
 

@@ -19,9 +19,9 @@ struct SGD {
 
 	/* run sgd optimization */
 	// TODO: is this interface generally?
-	template<class ForwardIn, class ForwardOut, class ParamType>
-	void compute(ForwardIn const& fin, ForwardOut const& gradient, ParamType& param) {
-		param = param - fin.transpose() * gradient * 0.001;
+	template<class ForwardIn, class BackwardIn, class ParamType>
+	void compute(ForwardIn const& fin, BackwardIn const& bin, ParamType& param) {
+		param = param - fin.transpose() * bin * 0.001;
 	}
 };
 

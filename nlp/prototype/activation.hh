@@ -17,14 +17,29 @@ namespace prototype {
 
 struct ActivateEmpty {
 	template<class SourceType>
-	static void compute(SourceType& source) {}
+	static void forward(SourceType& source) {}
+
+	template<class SourceType>
+	static void backward(SourceType& source) {}
 };
 
 
 struct ActivateRelu {
 	template<class SourceType>
 	static void compute(SourceType& source) {
-		source = (source.array().abs() + source.array()) / 2;
+		//source = (source.array().abs() + source.array()) / 2;
+		source = source.array().cwiseMax(0.0);
+	}
+
+	template<class SourceType>
+	static void forward(SourceType& source) {
+		//source = (source.array().abs() + source.array()) / 2;
+		source = source.array().cwiseMax(0.0);
+	}
+
+	template<class SourceType>
+	static void backward(SourceType& source) {
+		source = source.array().cwiseMax(0.0);
 	}
 };
 
