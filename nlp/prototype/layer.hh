@@ -16,6 +16,9 @@ namespace nlp {
 
 namespace prototype {
 
+/* layer base class */
+class LayerBase {};
+
 /* dense layer class */
 //template<class Matrix, class Loss>
 // TODO: seperate the class Loss and move into optimizer
@@ -32,7 +35,9 @@ public:
 public:
 	/* ctor & dtor */
 	Dense(size_t input_dim, size_t output_dim) : param_(input_dim, output_dim) {
-		param_.setZero(); // must done here, for eigen deduction
+		//param_.setZero(); // must done here, for eigen deduction
+		param_.setRandom();
+		//param_ *= 0.01;
 		optimizer_.initialize();
 	}
 	Dense(Dense const&) = delete;
@@ -52,11 +57,35 @@ public:
 		/* bin: as the gradient back propagated from the next layer */
 		// activation backward
 		Activation::backward(bin);
+
 		// calculate residual
-		//bout = bin * param_.transpose(); // XXX: ???
+		bout = bin * param_.transpose(); // XXX: ???
 
 		// update parameters
 		optimizer_.compute(fin, bin, param_);
+	}
+
+	template<class ForwardIn, class ForwardOut, class BackwardIn, class BackwardOut>
+	void backward(ForwardIn const& fin, ForwardOut const& fout,
+		BackwardIn const& bin, BackwardOut& bout, float lr) {
+		Activation::backward(bin);
+		bout = bin * param_.transpose();
+		optimizer_.compute(fin, bin, param_, lr);
+	}
+
+	template<class ForwardIn, class ForwardOut, class BackwardIn>
+	void backward(ForwardIn const& fin, ForwardOut const& fout, BackwardIn& bin) {
+		// backward without calculating the backward output
+		//cout << bin.rows() << "," << bin.cols() << "\n";
+		//bin = bin.array().cwiseMax(0.0);
+		Activation::backward(bin);
+		optimizer_.compute(fin, bin, param_);
+	}
+
+	template<class ForwardIn, class ForwardOut, class BackwardIn>
+	void backward(ForwardIn const& fin, ForwardOut const& fout, BackwardIn& bin, float lr) {
+		Activation::backward(bin);
+		optimizer_.compute(fin, bin, param_, lr);
 	}
 
 	/*

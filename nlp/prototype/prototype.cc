@@ -10,6 +10,7 @@
 #include "variable.hh"
 #include "loss.hh"
 #include "model.hh"
+#include "io.hh"
 using namespace nlp::prototype;
 using std::cout;
 
@@ -35,15 +36,18 @@ int main(int argc, char* argv[]) {
 	*/
 
 	Model model;
-	model.load_data(argv[1]);
-	model.train();
+	model.train3(argv[1]);
 
-	/*v_sparse_t in{4, 5};
-	in.insert(0, 4) = 3;
-	in.insert(2, 2) = 1;
-	cout << in << "\n";
-	v_sparse_t b = in.block(0,0,2,5);
-	cout << b << "\n";*/
+
+	/*FileTrain ft;
+	ft.load_data(argv[1]);
+	v_sparse_t x_train, y_train, x_test, y_test;
+	ft.get_data(x_train, y_train, x_test, y_test);
+	cout << "x_train shape: " << x_train.rows() << "," << x_train.cols() << "\n";
+	cout << "y_train shape: " << y_train.rows() << "," << y_train.cols() << "\n";
+	cout << "x_test shape: " << x_test.rows() << "," << x_test.cols() << "\n";
+	cout << "y_test shape: " << y_test.rows() << "," << y_test.cols() << "\n";*/
+
 }
 
 

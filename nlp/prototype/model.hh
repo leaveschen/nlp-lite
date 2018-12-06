@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "io.hh"
 #include "variable.hh"
 #include "layer.hh"
 #include "loss.hh"
@@ -120,6 +121,18 @@ public:
 		cout << "accuracy: " << corr / fout.rows() << "\n";
 	}
 
+	void acc(v_dense_t const& fout, v_sparse_t const& labels) {
+		v_dense_t::Index idx;
+		float corr = 0.0;
+		for (int i = 0; i < labels.outerSize(); ++i) {
+			for (v_sparse_t::InnerIterator it(labels, i); it; ++it) {
+				fout.row(it.row()).maxCoeff(&idx);
+				if (idx == it.col()) corr += 1;
+			}
+		}
+		cout << "accuracy: " << corr / fout.rows() << "\n";
+	}
+
 	void train() {
 		int epoch = 5;
 		v_dense_t fout;
@@ -142,6 +155,59 @@ public:
 			acc(fout, label_train);
 			std::cout << "test accuracy\n";
 			acc(tout, label_test);
+		}
+	}
+
+	void train2(std::string fn) {
+		FileTrain ft;
+		ft.load_data(fn);
+		v_sparse_t x_train, y_train, x_test, y_test;
+		ft.get_data(x_train, y_train, x_test, y_test);
+
+		Dense<matrix_t, ActivateEmpty, SGD> layer0(ft.nfeature(), ft.nclass());
+
+		int epoch = 5;
+		v_dense_t fout, bout, tout;
+		for (int i = 0; i < epoch; ++i) {
+			std::cout << "epoch: " << i << "\n";
+			layer0.forward(x_test, tout);
+			layer0.forward(x_train, fout);
+			v_dense_t gradient;
+			CategoricalCrossentropy::backward(fout, y_train, gradient);
+			layer0.backward(x_train, fout, gradient, bout);
+
+			std::cout << "train accuracy\n";
+			acc(fout, y_train);
+			std::cout << "test accuracy\n";
+			acc(tout, y_test);
+		}
+	}
+
+	void train3(std::string fn) {
+		FileTrain ft;
+		ft.load_data(fn);
+		v_sparse_t x_train, y_train, x_test, y_test;
+		ft.get_data(x_train, y_train, x_test, y_test, 1);
+
+		Dense<matrix_t, ActivateRelu, SGD> layer0(ft.nfeature(), 20);
+		Dense<matrix_t, ActivateEmpty, SGD> layer1(20, ft.nclass());
+
+		v_dense_t f0out, f1out, b1out;
+		int epoch = 5;
+		for (int i = 0; i < epoch; ++i) {
+			float lr = (float)(i) / epoch * 0.1;
+			layer0.forward(x_train, f0out);
+			//cout << "====== f0 out ======\n" << f0out << "\n\n";
+			layer1.forward(f0out, f1out);
+			//cout << "====== f1 out ======\n" << f1out << "\n\n";
+			v_dense_t gradient;
+			CategoricalCrossentropy::backward(f1out, y_train, gradient);
+			//cout << "====== loss back ======\n" << gradient << "\n\n";
+			layer1.backward(f0out, f1out, gradient, b1out, lr);
+			layer0.backward(x_train, f0out, b1out, lr);
+
+			std::cout << "train accuracy\n";
+			acc(f1out, y_train);
 		}
 	}
 };

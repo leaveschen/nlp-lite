@@ -18,7 +18,8 @@ set(HOME_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${HOME_DIR} ${HOME_DIR}/../)
 
 # source
+set(SOURCE ${HOME_DIR}/io.cc)
 
 # executable
-add_executable(prototype ${HOME_DIR}/prototype.cc)
+add_executable(prototype ${HOME_DIR}/prototype.cc ${SOURCE})
 

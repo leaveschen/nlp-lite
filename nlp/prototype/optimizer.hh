@@ -7,6 +7,9 @@
 
 /* include section */
 
+#include <iostream>
+using std::cout;
+
 /* class & function section */
 
 namespace nlp {
@@ -21,7 +24,16 @@ struct SGD {
 	// TODO: is this interface generally?
 	template<class ForwardIn, class BackwardIn, class ParamType>
 	void compute(ForwardIn const& fin, BackwardIn const& bin, ParamType& param) {
-		param = param - fin.transpose() * bin * 0.001;
+		ParamType d = fin.transpose() * bin;
+		//cout << "diff:\n" << d << "\n";
+		//cout << "param:\n" << param << "\n";
+		param = param - fin.transpose() * bin * 0.01;
+		//cout << "param after update:\n" << param << "\n";
+	}
+
+	template<class ForwardIn, class BackwardIn, class ParamType>
+	void compute(ForwardIn const& fin, BackwardIn const& bin, ParamType& param, float lr) {
+		param = param - fin.transpose() * bin * lr;
 	}
 };
 
